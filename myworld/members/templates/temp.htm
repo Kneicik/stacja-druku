@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temperatura</title>
+</head>
+<body>
+  {% load static %}
+  <script src="{% static 'script.js' %}"></script>
+    <form>
+        <input type="number" placeholder="temperatura" id="liczba">
+        <input type="button" value="Ustaw temperaturę" id="send-request-button">
+        <p> 
+          Oś X:      
+          <input type="button" value="+" id="xplus">
+          <input type="button" value="-" id="xmin">
+        </p>
+        <p> 
+          Oś Y:      
+          <input type="button" value="+" id="yplus">
+          <input type="button" value="-" id="ymin">
+        </p>
+        <p> 
+          Oś Z:      
+          <input type="button" value="+" id="zplus">
+          <input type="button" value="-" id="zmin">
+        </p>
+    </form>
+    <p id="actual"></p>
+    <p id="target"></p>
+    <p id="dane"></p>
+
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <label for="file">Wybierz plik:</label>
+      <input type="file" name="file" id="file">
+      <input type="submit" value="Wgraj plik">
+    </form>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+api = 'C46964C92A8B40C0B331AB1AA5441C46';
+document.getElementById('send-request-button').addEventListener('click', function() {
+fetch('http://192.168.0.27/api/printer/tool', {
+method: 'POST',
+headers: {
+  'Content-Type': 'application/json',
+  'X-Api-Key': api
+},
+body: JSON.stringify({
+    apikey: api,
+  command: 'target',
+  targets: {
+    tool0: parseInt(document.getElementById('liczba').value),
+  }
+})
+})
+.then(response => response.json())
+.then(data => {
+console.log('Odpowiedź:', data);
+});
+});
+
+document.getElementById('xplus').addEventListener('click', function() {
+fetch('http://192.168.0.27/api/printer/command', {
+method: 'POST',
+headers: {
+  'Content-Type': 'application/json',
+  'X-Api-Key': api
+},
+body: JSON.stringify({
+    apikey: api,
+  command: [
+    'G0 X+10',
+  ]
+  
+})
+})
+.then(responsexp => responsexp.json())
+.then(dataxp => {
+console.log('Odpowiedź:', dataxp);
+});
+});
+
+document.getElementById('xmin').addEventListener('click', function() {
+fetch('http://192.168.0.27/api/printer/command', {
+method: 'POST',
+headers: {
+  'Content-Type': 'application/json',
+  'X-Api-Key': api
+},
+body: JSON.stringify({
+    apikey: api,
+  command: [
+    'G0 X-10',
+  ]
+  
+})
+})
+.then(responsexm => responsexm.json())
+.then(dataxm => {
+console.log('Odpowiedź:', dataxm);
+});
+});
+
+document.getElementById('yplus').addEventListener('click', function() {
+fetch('http://192.168.0.27/api/printer/command', {
+method: 'POST',
+headers: {
+  'Content-Type': 'application/json',
+  'X-Api-Key': api
+},
+body: JSON.stringify({
+    apikey: api,
+  command: [
+    'G0 Y+10',
+  ]
+  
+})
+})
+.then(responseyp => responseyp.json())
+.then(datayp => {
+console.log('Odpowiedź:', datayp);
+});
+});
+
+document.getElementById('ymin').addEventListener('click', function() {
+fetch('http://192.168.0.27/api/printer/command', {
+method: 'POST',
+headers: {
+  'Content-Type': 'application/json',
+  'X-Api-Key': api
+},
+body: JSON.stringify({
+    apikey: api,
+  command: [
+    'G0 Y-10',
+  ]
+  
+})
+})
+.then(responseym => responseym.json())
+.then(dataym => {
+console.log('Odpowiedź:', dataym);
+});
+});
+
+document.getElementById('zplus').addEventListener('click', function() {
+fetch('http://192.168.0.27/api/printer/command', {
+method: 'POST',
+headers: {
+  'Content-Type': 'application/json',
+  'X-Api-Key': api
+},
+body: JSON.stringify({
+    apikey: api,
+  command: [
+    'G0 Z+10',
+  ]
+  
+})
+})
+.then(responsezp => responsezp.json())
+.then(datazp => {
+console.log('Odpowiedź:', datazp);
+});
+});
+
+document.getElementById('zmin').addEventListener('click', function() {
+fetch('http://192.168.0.27/api/printer/command', {
+method: 'POST',
+headers: {
+  'Content-Type': 'application/json',
+  'X-Api-Key': api
+},
+body: JSON.stringify({
+    apikey: api,
+  command: [
+    'G0 Z-10',
+  ]
+  
+})
+})
+.then(responsezm => responsezm.json())
+.then(datazm => {
+console.log('Odpowiedź:', datazm);
+});
+});
+
+function refreshData() {
+fetch('http://192.168.0.27/api/printer/tool?apikey=C46964C92A8B40C0B331AB1AA5441C46')
+.then(response => response.json())
+.then(data => {
+console.log("dane: ", data);
+document.getElementById("actual").innerHTML = "Aktualna temperatura: " + data.tool0.actual;
+document.getElementById("target").innerHTML = "Docelowa temperatura: " + data.tool0.target;
+
+});
+}
+setInterval(refreshData, 1000);
+
+$(document).ready(function() {
+  setInterval(function() {
+    $.get('http://192.168.0.27/api/job?apikey=C46964C92A8B40C0B331AB1AA5441C46', function(response) {
+
+      document.getElementById("dane").innerHTML =  "Nazwa drukowanego pliku: " + response.job.file.display + " <br> <br> Pozostały czas: " + Math.floor(response.progress.printTimeLeft/60) + ":" + response.progress.printTimeLeft%60 + " <br>";
+
+    });
+  },1000);
+})
+  </script>
+</body>
+</html>
