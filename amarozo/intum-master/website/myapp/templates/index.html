@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Robo</title>
+</head>
+<body>
+    {% if connected %}
+    <h1>Status: Connected</h1>
+    <form method="post">
+        {% csrf_token %}
+        <input type="submit" value="Breake release">
+    </form>
+{% else %}
+    <h1>Status: Not Connected</h1>
+{% endif %}
+
+</body>
+</html>
